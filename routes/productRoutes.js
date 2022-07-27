@@ -13,21 +13,21 @@ const {
 const router = express.Router();
 
 //get all the products
-router.get("/", getProducts);
+router.get("/products", getProducts);
 
 //get products in a certain collection
-router.get("/", getCertainProductCollection);
+router.get("/products/:type", getCertainProductCollection);
 
 //get a certain product
-router.get("/:id", getProduct);
+router.get("/product/:id", getProduct);
 
 //create a new product
-router.post("/", createProduct);
+router.post("/product", createProduct);
 
 //delete an existing product
-router.delete("/:id", deleteProduct);
+router.delete("/product/:id", deleteProduct);
 
 //update an existing product
-router.patch("/:id", updateProduct);
+router.patch("/product/:id", updateProduct);
 
 module.exports = router;
