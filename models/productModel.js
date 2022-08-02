@@ -40,12 +40,7 @@ const productSchema = new Schema({
     },
     productAdminID: {
         type: String,
-        required: true,
-    },
-    productCollection: {
-        type: String,
-        required: true,
-        index:true,
+        required: false,
     }
 }, { timestamps: true });
 
