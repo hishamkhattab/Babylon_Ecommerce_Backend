@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 
 //router
 const productRouter = require("./routes/productRoutes");
+const userRouter = require("./routes/userRoutes");
 
 const app = express();
 //middleware
@@ -17,6 +18,7 @@ app.use((req, res, next) => {
 
 //routes
 app.use("/api/ecommerce", productRouter);
+app.use("/api/user", userRouter);
 
 //connecting to mongoDB
 mongoose.connect(process.env.MONGO_DB)

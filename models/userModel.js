@@ -31,6 +31,14 @@ userSchema.statics.signup = async function (email, password, displayName) {
         throw Error("All fields must be filled!");
     }
 
+
+    //check email if exists
+    const userEmail = await this.findOne({ email });
+
+    if (userEmail) {
+        throw Error("Email Already Exists");
+    };
+
     //check if the email input is a proper email 
     if (!validator.isEmail(email)) {
         throw Error("Email is not valid")
@@ -38,7 +46,7 @@ userSchema.statics.signup = async function (email, password, displayName) {
 
     //check if password is a strong one
     if (!validator.isStrongPassword(password)) {
-        throw Error("Password not strong")
+        throw Error("Password must have: a number, capital letter, and special character")
     };
 
     //hash the password using bcrypt package
@@ -48,6 +56,50 @@ userSchema.statics.signup = async function (email, password, displayName) {
 
     //create user-roles array with a default role as user:
     const userRoles = ["user"];
+
+    const user = await this.create({
+        email,
+        password: hash,
+        userRoles,
+        displayName
+    });
+    
+    return user;
+};
+
+
+//create sign-up admin method
+userSchema.statics.signupAdmin = async function (email, password, displayName) {
+    
+    //validate email and password
+    if (!email || !password) {
+        throw Error("All fields must be filled!");
+    }
+
+    //check email if exists
+    const userEmail = await this.findOne({ email });
+
+    if (userEmail) {
+        throw Error("Email Already Exists");
+    };
+    
+    //check if the email input is a proper email 
+    if (!validator.isEmail(email)) {
+        throw Error("Email is not valid")
+    };
+
+    //check if password is a strong one
+    if (!validator.isStrongPassword(password)) {
+        throw Error("Password must have: a number, capital letter, and special character")
+    };
+
+    //hash the password using bcrypt package
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    
+
+    //create user-roles array with a default role as user:
+    const userRoles = ["user", "admin"];
 
     const user = await this.create({
         email,
