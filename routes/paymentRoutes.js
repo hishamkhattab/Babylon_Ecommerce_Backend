@@ -2,10 +2,21 @@ const express = require("express");
 const Stripe = require('stripe');
 const router = express.Router();
 
+const {
+  createOrder
+} = require("../controllers/orderControllers");
+
 const stripe = Stripe(process.env.STRIPE_KEY);
 
 router.post('/create-checkout-session', async (req, res) => {
-  const prodcuts = req.body.map(item => {
+
+  const customer = await stripe.customers.create({
+    metadata: {
+      userID: req.body.userID,
+      cart: JSON.stringify(req.body.cart)
+    }
+  })
+  const prodcuts = req.body.cart.map(item => {
     return {
       price_data: {
         currency: 'usd',
@@ -76,9 +87,13 @@ router.post('/create-checkout-session', async (req, res) => {
     phone_number_collection: {
       enabled:true
     },
+    customer_update: {
+      shipping: 'auto',
+    },
     automatic_tax: {
       enabled: true,
     },
+    customer:customer.id,
       line_items: [
         ...prodcuts
       ],
@@ -89,5 +104,45 @@ router.post('/create-checkout-session', async (req, res) => {
   
   res.status(200).json(session.url);
 });
+
+//stripe webhook
+
+
+// This is your Stripe CLI webhook secret for testing your endpoint locally.
+const endpointSecret = "whsec_b6235989f8ca70a88c5701e26efb6b0717f7d0a07475eb8ead1a8d8767dd19b7";
+
+router.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
+  const sig = request.headers['stripe-signature'];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+    console.log("Webhook verified");
+  } catch (err) {
+    console.log(`Webhook Error: ${err.message}`);
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+  
+  // Handle the event
+  switch (event.type) {
+    case 'checkout.session.completed':
+      const session = event.data.object;
+      
+      stripe.customers.retrieve(session.customer).then(customer => {
+        createOrder(customer, session);
+      }).catch(err => console.log("error:", err.message))
+      // Then define and call a function to handle the event checkout.session.completed
+      break;
+    // ... handle other event types
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  // Return a 200 response to acknowledge receipt of the event
+  response.send().end();
+});
+
   
 module.exports = router;
