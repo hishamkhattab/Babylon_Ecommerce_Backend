@@ -7,7 +7,8 @@ const {
     getProduct,
     createProduct,
     deleteProduct,
-    updateProduct
+    updateProduct,
+    getCertainProductAdmin
 } = require("../controllers/productControllers");
 
 const router = express.Router();
@@ -17,6 +18,9 @@ router.get("/products", getProducts);
 
 //get products in a certain collection
 router.get("/products/:type", getCertainProductCollection);
+
+//get products in a certain admin
+router.get("/products/user/:id", getCertainProductAdmin);
 
 //get a certain product
 router.get("/product/:id", getProduct);

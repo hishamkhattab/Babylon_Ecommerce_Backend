@@ -40,7 +40,7 @@ const productSchema = new Schema({
     },
     productAdminID: {
         type: String,
-        required: false,
+        required: true,
     }
 }, { timestamps: true });
 

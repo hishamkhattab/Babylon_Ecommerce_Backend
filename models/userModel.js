@@ -37,7 +37,7 @@ userSchema.statics.signup = async function (email, password, displayName) {
 
     if (userEmail) {
         throw Error("Email Already Exists");
-    };
+    };cl
 
     //check if the email input is a proper email 
     if (!validator.isEmail(email)) {

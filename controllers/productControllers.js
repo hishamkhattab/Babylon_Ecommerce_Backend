@@ -25,6 +25,16 @@ const getCertainProductCollection = async (req, res) => {
     res.status(200).json(product);
 };
 
+//get product's for certain admin
+const getCertainProductAdmin = async (req, res) => {
+    const adminID = req.params.id;
+    	const page = req.query.page || 0;
+	const productPerPage = 8;
+
+    const product = await Product.find({ productAdminID: adminID }).sort({ updatedAt: -1 }).skip(page * productPerPage).limit(productPerPage);
+    res.status(200).json(product);
+}
+
 //get a single product
 const getProduct = async (req, res) => {
     const productID = req.params.id;
@@ -124,5 +134,6 @@ module.exports = {
     getProduct,
     createProduct,
     deleteProduct,
-    updateProduct
+    updateProduct,
+    getCertainProductAdmin
 }
