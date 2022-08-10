@@ -2,9 +2,7 @@ const express = require("express");
 const Stripe = require('stripe');
 const router = express.Router();
 
-const {
-  createOrder
-} = require("../controllers/orderControllers");
+const {createOrder} = require("../controllers/orderControllers");
 
 const stripe = Stripe(process.env.STRIPE_KEY);
 
@@ -99,7 +97,7 @@ router.post('/create-checkout-session', async (req, res) => {
       ],
       mode: 'payment',
       success_url: `${process.env.CLIENT_url}/purchase`,
-      cancel_url: `${process.env.CLIENT_url}`,
+      cancel_url: `${process.env.CLIENT_url}/cart`,
     });
   
   res.status(200).json(session.url);

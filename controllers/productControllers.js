@@ -10,7 +10,7 @@ const getProducts = async (req, res) => {
 	
 	console.log(page)
 	
-    const product = await Product.find({}).sort({ updatedAt: -1 }).skip(page * productPerPage).limit(productPerPage);
+    const product = await Product.find({}).sort({ createdAt: -1 }).skip(page * productPerPage).limit(productPerPage);
     res.status(200).json(product);
     
 };
@@ -21,7 +21,7 @@ const getCertainProductCollection = async (req, res) => {
 	const page = req.query.page || 0;
 	const productPerPage = 8;
 	
-    const product = await Product.find({productCategory : type}).sort({ updatedAt: -1 }).skip(page * productPerPage).limit(productPerPage);
+    const product = await Product.find({productCategory : type}).sort({ createdAt: -1 }).skip(page * productPerPage).limit(productPerPage);
     res.status(200).json(product);
 };
 
@@ -112,19 +112,20 @@ const deleteProduct = async (req, res) => {
 
 //update an existing product
 const updateProduct = async (req, res) => {
-    const productID = req.params.id;
+    const { cart } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(productID)) {
-        return res.status(404).json({ error: "No such product" });
-    };
-
-    const product = await Product.findOneAndUpdate({ _id: productID }, { ...req.body });
-
-    if (!product) {
-        return res.status(404).json({ error: "No such product" });
-    };
-
-    res.status(200).json(product);
+    cart.forEach((item) => {
+        if (!mongoose.Types.ObjectId.isValid(item._id)) {
+            return res.status(404).json({ error: "No such product" });
+        };
+        const quantity = parseInt(item.qty);
+        Product.findOneAndUpdate({ _id: item._id }, { $inc: { stock: -quantity } }).then(product => {
+            if (!product) {
+                return res.status(404).json({ error: "Could not update" });
+            };
+        });
+    })
+    res.status(200).json({"msg": "update successfully"});
 };
 
 //export all functions

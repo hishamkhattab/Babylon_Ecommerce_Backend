@@ -32,6 +32,6 @@ router.post("/product", createProduct);
 router.delete("/product/:id", deleteProduct);
 
 //update an existing product
-router.patch("/product/:id", updateProduct);
+router.patch("/product", updateProduct);
 
 module.exports = router;
