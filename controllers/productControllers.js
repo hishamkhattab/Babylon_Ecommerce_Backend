@@ -112,8 +112,10 @@ const deleteProduct = async (req, res) => {
 
 //update an existing product
 const updateProduct = async (req, res) => {
-    const { cart } = req.body;
-
+    const cart = req.body;
+    if (cart?.length === 0) {
+        return res.status(404).json({ error: "Could not update" });
+    };
     cart.forEach((item) => {
         if (!mongoose.Types.ObjectId.isValid(item._id)) {
             return res.status(404).json({ error: "No such product" });

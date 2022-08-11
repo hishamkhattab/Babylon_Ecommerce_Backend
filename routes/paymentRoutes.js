@@ -2,19 +2,27 @@ const express = require("express");
 const Stripe = require('stripe');
 const router = express.Router();
 
-const {createOrder} = require("../controllers/orderControllers");
+const {createOrder,getAllUserOrders, getOrderDetails} = require("../controllers/orderControllers");
 
 const stripe = Stripe(process.env.STRIPE_KEY);
 
 router.post('/create-checkout-session', async (req, res) => {
 
+  const productItems = {};
+  req.body.cart.forEach((el, idx) => {
+    productItems[`product_${idx + 1}`] = JSON.stringify(el)
+  })
   const customer = await stripe.customers.create({
     metadata: {
       userID: req.body.userID,
-      cart: JSON.stringify(req.body.cart)
+      cartLength: req.body.cart.length,
+      ...productItems
+      // cart: JSON.stringify(cart)
     }
-  })
+  });
+
   const prodcuts = req.body.cart.map(item => {
+
     return {
       price_data: {
         currency: 'usd',
@@ -103,14 +111,11 @@ router.post('/create-checkout-session', async (req, res) => {
   res.status(200).json(session.url);
 });
 
-//stripe webhook
-
-
-// This is your Stripe CLI webhook secret for testing your endpoint locally.
 const endpointSecret = process.env.WEBHOOK_KEY;
-
+//stripe webhook
 router.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
   const sig = request.headers['stripe-signature'];
+  // This is your Stripe CLI webhook secret for testing your endpoint locally.
 
   let event;
 
@@ -119,7 +124,7 @@ router.post('/webhook', express.raw({type: 'application/json'}), (request, respo
     console.log("Webhook verified");
   } catch (err) {
     console.log(`Webhook Error: ${err.message}`);
-    response.status(400).send(`Webhook Error: ${err.message}`);
+    response.status(400).json(`Webhook Error: ${err.message}`);
     return;
   }
   
@@ -127,8 +132,10 @@ router.post('/webhook', express.raw({type: 'application/json'}), (request, respo
   switch (event.type) {
     case 'checkout.session.completed':
       const session = event.data.object;
+      console.log(session);
       
       stripe.customers.retrieve(session.customer).then(customer => {
+        console.log(customer);
         createOrder(customer, session);
       }).catch(err => console.log("error:", err.message))
       // Then define and call a function to handle the event checkout.session.completed
@@ -142,5 +149,8 @@ router.post('/webhook', express.raw({type: 'application/json'}), (request, respo
   response.send().end();
 });
 
-  
+router.get("/orders/:id", getAllUserOrders);
+
+router.get("/order/:id", getOrderDetails);
+
 module.exports = router;
