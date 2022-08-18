@@ -41,6 +41,12 @@ const productSchema = new Schema({
     productAdminID: {
         type: String,
         required: true,
+    },
+    productReview: {
+        type: Number
+    },
+    productComments: {
+        type: [Object]
     }
 }, { timestamps: true });
 

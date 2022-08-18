@@ -8,7 +8,8 @@ const {
     createProduct,
     deleteProduct,
     updateProduct,
-    getCertainProductAdmin
+    getCertainProductAdmin,
+    addReviewToProduct
 } = require("../controllers/productControllers");
 
 const router = express.Router();
@@ -33,5 +34,9 @@ router.delete("/product/:id", deleteProduct);
 
 //update an existing product
 router.patch("/product", updateProduct);
+
+
+//add a review and comment on a product
+router.patch("/product/:id", addReviewToProduct);
 
 module.exports = router;

@@ -130,6 +130,22 @@ const updateProduct = async (req, res) => {
     res.status(200).json({"msg": "update successfully"});
 };
 
+const addReviewToProduct = async (req, res) => {
+    const productID = req.params.id;
+    const { comment, review } = req.body;
+
+    if (!mongoose.Types.ObjectId(productID)) {
+        return res.status(404).json({ error: "could not find a product" });
+    };
+
+    try {
+        const product = await Product.findByIdAndUpdate({ _id: productID }, { $set: { productReview: review, productComments:  productComments.push(comment)} });
+        res.status(200).json({ msg: "Added successuflly", product });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
 //export all functions
 module.exports = {
     getProducts,
@@ -138,5 +154,6 @@ module.exports = {
     createProduct,
     deleteProduct,
     updateProduct,
-    getCertainProductAdmin
+    getCertainProductAdmin,
+    addReviewToProduct
 }
