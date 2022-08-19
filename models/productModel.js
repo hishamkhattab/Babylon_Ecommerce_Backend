@@ -42,9 +42,6 @@ const productSchema = new Schema({
         type: String,
         required: true,
     },
-    productReview: {
-        type: Number
-    },
     productComments: {
         type: [Object]
     }
